@@ -15,7 +15,15 @@ def parse_rss(xml_text, source):
 
 def fetch_sec():
     url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&count=100&output=atom"
-    r = requests.get(url, headers={"User-Agent":"DYFAL-Exec-Signal"}, timeout=30)
+    r = requests.get(
+    url,
+    headers={
+        "User-Agent": "Dyfal Executive Signal Bot / 1.0 (Contact: support@dyfal.ai)",
+        "Accept-Encoding": "gzip, deflate",
+        "Host": "www.sec.gov"
+    },
+    timeout=30
+)
     r.raise_for_status()
     all_items = parse_rss(r.text, "SEC EDGAR 8-K 5.02")
     return [i for i in all_items if "Item 5.02" in (i["title"] or "")]
@@ -44,3 +52,4 @@ if __name__ == "__main__":
     with open("executive_signals.json", "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
     print(f"Wrote {len(data)} records → executive_signals.csv / .json")
+
