@@ -3,19 +3,29 @@ on:
   schedule:
     - cron: "15 * * * *"
   workflow_dispatch: {}
+
+permissions:
+  contents: write
+
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
       - run: pip install requests
       - run: python exec_signal_scraper.py
-      - run: |
+      - name: Configure git auth
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+      - name: Commit outputs
+        run: |
           git add executive_signals.csv executive_signals.json
           git commit -m "Auto update $(date -u +'%Y-%m-%dT%H:%M:%SZ')" || echo "No changes"
           git push
